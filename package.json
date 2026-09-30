@@ -231,6 +231,7 @@
     "victory-native": "^41.21.0",
     "xlsx": "^0.18.5"
   },
+  
   "devDependencies": {
     "@aaroon/workbox-rspack-plugin": "^1.0.1",
     "@actions/core": "3.0.1",
