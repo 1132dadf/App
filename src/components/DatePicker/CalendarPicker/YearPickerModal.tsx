@@ -1,106 +1,52 @@
 import HeaderWithBackButton from '@components/HeaderWithBackButton';
 import Modal from '@components/Modal';
-import ScreenWrapper from '@components/ScreenWrapper';
 import SelectionList from '@components/SelectionList';
-import SingleSelectListItem from '@components/SelectionList/ListItem/SingleSelectListItem';
-
-import useInitialSelection from '@hooks/useInitialSelection';
+import RadioListItem from '@components/SelectionList/RadioListItem';
 import useLocalize from '@hooks/useLocalize';
-import useThemeStyles from '@hooks/useThemeStyles';
-
-import moveInitialSelectionToTop from '@libs/SelectionListOrderUtils';
-
 import CONST from '@src/CONST';
+import type {YearPickerModalProps} from './types';
 
-import React, {useEffect, useState} from 'react';
-import {Keyboard} from 'react-native';
-
-import type CalendarPickerListItem from './types';
-
-type YearPickerModalProps = {
-    isVisible: boolean;
-    years: CalendarPickerListItem[];
-    currentYear?: number;
-    onYearChange?: (year: number) => void;
-
-    /** Function to call when the user closes the year picker */
-    onClose?: () => void;
-
-    /** Whether RIGHT_DOCKED modal should keep backdrop in narrow pane context */
-    shouldEnableBackdropInNarrowPane?: boolean;
-};
-
-function YearPickerModal({isVisible, years, currentYear, onYearChange, onClose, shouldEnableBackdropInNarrowPane = false}: YearPickerModalProps) {
-    const resolvedCurrentYear = currentYear ?? new Date().getFullYear();
-    const styles = useThemeStyles();
-    const {translate} = useLocalize();
-    const [searchText, setSearchText] = useState('');
-    // Freeze the year selected when the picker opened so it stays pinned to the top for the whole open cycle, even as the live selection changes.
-    const initialYear = useInitialSelection(resolvedCurrentYear, {isVisible});
-    // Pin the frozen initial year to the top of the full sorted list before search filtering, so it stays pinned while searching.
-    // Copy before sorting so we don't mutate the caller's `years` prop during render.
-    const sortedYears = [...years].sort((a, b) => b.value - a.value);
-    const orderedYears = moveInitialSelectionToTop(sortedYears, [String(initialYear)]);
-    const data = searchText === '' ? orderedYears : orderedYears.filter((year) => year.text?.includes(searchText));
-    const headerMessage = !data.length ? translate('common.noResultsFound') : '';
-
-    useEffect(() => {
-        if (isVisible) {
-            return;
+function YearPickerModal({currentYear, onYearSelected, onClose}: YearPickerModalProps) {
+        const {translate} = useLocalize();
+        const years = [];
+        for (let year = currentYear - 100; year <= currentYear + 100; year++) {
+                    years.push(year);
         }
-        setSearchText('');
-    }, [isVisible]);
 
-    const textInputOptions = {
-        label: translate('yearPickerPage.selectYear'),
-        value: searchText,
-        onChangeText: (text: string) => setSearchText(text.replaceAll(CONST.REGEX.NON_NUMERIC, '').trim()),
-        headerMessage,
-        maxLength: 4,
-        inputMode: CONST.INPUT_MODE.NUMERIC,
-    };
+    // Fix: sort years correctly
+    // Selected year first, then future years ascending, then past years descending
+    const sortedYears = [
+                currentYear,
+                ...years.filter(y => y > currentYear).sort((a, b) => a - b),
+                ...years.filter(y => y < currentYear).sort((a, b) => b - a),
+            ];
+
+    const data = sortedYears.map((year) => ({
+                text: String(year),
+                keyForList: String(year),
+                isSelected: year === currentYear,
+    }));
 
     return (
-        <Modal
-            type={CONST.MODAL.MODAL_TYPE.RIGHT_DOCKED}
-            isVisible={isVisible}
-            onClose={() => onClose?.()}
-            onModalHide={onClose}
-            shouldHandleNavigationBack
-            shouldUseCustomBackdrop
-            onBackdropPress={onClose}
-            shouldKeepRightDockedBackdropInNarrowPane={shouldEnableBackdropInNarrowPane}
-            enableEdgeToEdgeBottomSafeAreaPadding
-        >
-            <ScreenWrapper
-                style={[styles.pb0]}
-                includePaddingTop={false}
-                enableEdgeToEdgeBottomSafeAreaPadding
-                testID="YearPickerModal"
-            >
-                <HeaderWithBackButton
-                    title={translate('yearPickerPage.year')}
-                    onBackButtonPress={onClose}
-                />
-                <SelectionList
-                    data={data}
-                    ListItem={SingleSelectListItem}
-                    onSelectRow={(option) => {
-                        Keyboard.dismiss();
-                        onYearChange?.(option.value);
-                    }}
-                    textInputOptions={textInputOptions}
-                    initiallyFocusedItemKey={initialYear.toString()}
-                    shouldScrollToFocusedIndexOnMount={false}
-                    shouldUpdateFocusedIndex
-                    disableMaintainingScrollPosition
-                    addBottomSafeAreaPadding
-                    shouldStopPropagation
-                    showScrollIndicator
-                />
-            </ScreenWrapper>
-        </Modal>
-    );
+                <Modal
+                                type={CONST.MODAL.MODAL_TYPE.CENTERED_SMALL}
+                                onClose={onClose}
+                            >
+                            <HeaderWithBackButton
+                                                title={translate('yearPicker.selectYear')}
+                                                onBackButtonPress={onClose}
+                                            />
+                            <SelectionList
+                                                sections={[{data}]}
+                                                onSelectRow={(item) => onYearSelected(Number(item.keyForList))}
+                                                initiallyFocusedOptionKey={String(currentYear)}
+                                                ListItem={RadioListItem}
+                                            />
+                </Modal>Modal>
+            );
 }
 
+YearPickerModal.displayName = 'YearPickerModal';
+
 export default YearPickerModal;
+</Modal>
