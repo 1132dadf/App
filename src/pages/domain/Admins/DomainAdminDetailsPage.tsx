@@ -1,4 +1,5 @@
-import MenuItem from '@components/MenuItem';
+imp
+    ort MenuItem from '@components/MenuItem';
 import MenuItemAction from '@components/MenuItem/presets/MenuItemAction';
 import {ModalActions} from '@components/Modal/Global/ModalContext';
 
