@@ -1,4 +1,6 @@
-<div align="center">
+# Expensify App
+Contributor: 1132dadf
+div align="center">
     <a href="https://new.expensify.com">
         <img src="https://raw.githubusercontent.com/Expensify/App/main/web/favicon.png" width="64" height="64" alt="New Expensify Icon">
     </a>
@@ -49,6 +51,7 @@ For detailed setup instructions for each platform, see the following guides:
 * **🤖 Android Development**: [Android Setup Instructions](contributingGuides/SETUP_ANDROID.md)
 
 **Optional AI-assisted mobile testing:** If you use Claude Code, the [`/agent-device` skill](.claude/skills/agent-device/SKILL.md) drives iOS and Android simulators or devices for interactive testing, debugging, and performance profiling. Requires `npm install -g agent-device`.
+
 
 ## General Troubleshooting
 1. If you are having issues with **_Getting Started_**, please reference [React Native's Documentation](https://reactnative.dev/docs/environment-setup)
